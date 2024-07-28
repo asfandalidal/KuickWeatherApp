@@ -1,9 +1,13 @@
 package com.example.myweather.network
 
-import javax.inject.Inject
+import com.example.myweather.model.WeatherResponse
+import retrofit2.http.GET
+import retrofit2.http.Query
 
-class ApiService @Inject constructor(private val apiInterface: ApiInterface) {
-
-    suspend fun getCityWeather(cityName:String,apiKey:String) =
-        apiInterface.getCityWeather(cityName,apiKey)
+interface ApiService {
+    @GET("weather")
+    suspend fun getWeatherForecast(
+        @Query("q") cityName: String,
+        @Query("appid") apiKey: String
+    ): WeatherResponse
 }

@@ -18,7 +18,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBaseUrl(): String {
-        return "http://api.openweathermap.org/data/2.5/"
+        return "https://api.openweathermap.org/data/2.5/"
     }
 
     @Provides

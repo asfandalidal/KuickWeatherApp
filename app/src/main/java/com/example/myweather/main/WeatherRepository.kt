@@ -1,9 +1,9 @@
 package com.example.myweather.main
 
-import com.example.myweather.model.City
+import com.example.myweather.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 
 interface WeatherRepository {
-    fun getCityData(city: String): Flow<City>
+    suspend fun getCityData(cityName: String): WeatherResponse
 }

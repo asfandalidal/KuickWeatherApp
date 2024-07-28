@@ -1,17 +1,24 @@
 package com.example.myweather
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.myweather.databinding.ActivityMainBinding
 import com.example.myweather.main.WeatherViewModel
+import com.example.myweather.model.WeatherResponse
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -26,46 +33,57 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         initListener()
+        fetchInitialWeatherData()
 
         lifecycleScope.launchWhenStarted {
             weatherViewModel.weatherResponse.collect { response ->
-
-                when (response.weather[0].description) {
-                    "clear sky", "mist" -> {
-                        Glide.with(this@MainActivity)
-                            .load(R.drawable.clouds)
-                            .into(binding.image)
-                    }
-                    "haze", "overcast clouds" -> {
-                        Glide.with(this@MainActivity)
-                            .load(R.drawable.haze)
-                            .into(binding.image)
-                    }
-                    else -> {
-                        Glide.with(this@MainActivity)
-                            .load(R.drawable.rain)
-                            .into(binding.image)
-                    }
+                response?.let {
+                    Log.d("MainActivity", "Weather data received: $response")
+                    updateUI(response)
                 }
-
-                binding.description.text = response.weather[0].description
-                binding.cityName.text = response.cityName  // Changed to response.cityName to match your City data class
-                binding.degree.text = response.wind.deg.toString()
-                binding.speed.text = response.wind.speed.toString()
-                binding.temp.text =
-                    (((response.main.temp - 273) * 100.0).roundToInt() / 100.0).toString()
-                binding.humidity.text = response.main.humidity.toString()
-
             }
         }
+
+        lifecycleScope.launchWhenStarted {
+            weatherViewModel.errorMessage.collect { error ->
+                error?.let {
+                    Log.e("MainActivity", it)
+                    showCityNotFoundDialog() // Show dialog on error
+                }
+            }
+        }
+    }
+
+    private fun fetchInitialWeatherData() {
+        weatherViewModel.setSearchQuery("Karachi",true)
+    }
+
+    private fun updateUI(response: WeatherResponse) {
+        binding.description.text = response.weather[0].description
+        binding.cityName.text = response.name
+        binding.degree.text = "${response.wind.deg}°"
+        binding.speed.text = "${response.wind.speed} m/s"
+        binding.temp.text = "${((response.main.temp - 273.15) * 100.0).roundToInt() / 100.0} °C"
+        binding.humidity.text = "${response.main.humidity} %"
+
+        val weatherDescription = response.weather[0].description
+        val imageResource = when (weatherDescription) {
+            "clear sky", "few clouds" -> R.drawable.cloud
+            "broken clouds", "overcast clouds", "haze" -> R.drawable.fog
+            else -> R.drawable.rainy
+        }
+
+        Glide.with(this).load(imageResource).into(binding.image)
     }
 
     @ExperimentalCoroutinesApi
     private fun initListener() {
         binding.searchCity.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let { weatherViewModel.setSearchQuery(it) }
-                Log.d("main", "onQueryTextSubmit: $query")
+                query?.let {
+                    weatherViewModel.setSearchQuery(it)
+                    Log.d("MainActivity", "Search query submitted: $query")
+                }
                 return true
             }
 
@@ -74,5 +92,26 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
+    }
+
+    private fun showCityNotFoundDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_city_not_found, null)
+        val builder = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+        val dialog = builder.create()
+
+        val dialogImage = dialogView.findViewById<ImageView>(R.id.dialog_image)
+        val dialogText = dialogView.findViewById<TextView>(R.id.dialog_text)
+        val dialogButton = dialogView.findViewById<Button>(R.id.dialog_button)
+
+        dialogImage.setImageResource(R.drawable.umbrella)
+        dialogText.text = "City Not Found"
+        dialogButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
     }
 }
