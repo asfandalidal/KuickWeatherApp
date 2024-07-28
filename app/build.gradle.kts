@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android") // Correctly applied Hilt plugin
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -52,26 +52,24 @@ dependencies {
 
     // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48") // Updated compiler dependency
+    kapt("com.google.dagger:hilt-compiler:2.48")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0") // For JSON parsing with Gson
 
     // Coroutine
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4") // Updated version
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4") // Updated version
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     // LifeCycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0") // Updated version
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0") // Updated version
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:4.15.1") // Updated version
-    kapt("com.github.bumptech.glide:compiler:4.15.1") // Glide annotation processor
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
 
-
-    // When using Kotlin.
     implementation("androidx.activity:activity-ktx:1.5.1")
 }
 
